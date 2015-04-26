@@ -40,7 +40,7 @@ First we compare groups with the same dose level and different delivery methods.
 We compare independent groups under unequal variances with confidence t intervals. When in doubt, assume unequal variances. Under enequal variances the 95% interval is approximated with
 yhat - xhat +/-tdf*sqrt(Sx^2/nx + Sy^2/ny)
 where tdf is calculated with degress of freedom
-df = (Sx^2/nx + Sy^2/ny)^2 / ((Sx^2/nx)^2/(nx-1) + (Sy^2/ny)^2/(ny-1))
+df = (Sx^2 /nx + Sy^2 /ny)^2 / ((Sx^2 /nx)^2/(nx-1) + (Sy^2 /ny)^2/(ny-1))
 
 First we compare the two delivery methods for a 0.5 mg dose level of Vitamin C. We calculate the 95% confidence interval for the null hypothesis according to the expression above for two groups under unequal variances and also by using the t.test function in R.
 ```{r, echo=TRUE}
