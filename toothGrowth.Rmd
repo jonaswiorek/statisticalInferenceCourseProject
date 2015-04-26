@@ -1,12 +1,12 @@
 ---
-title: "Basic Inferential Data Analysis of Tooth Growth"
+title: "ToothGrowth.Rmd"
 author: "Jonas Wiorek"
 date: "Sunday, April 26, 2015"
-output: html_document
+output: pdf_document
 ---
-This report summarizes the analyses of the ToothGrowth data. The first step in the analyses is to make some basic exploratry data analyses.
 
-```{r, echo=FALSE}
+This report summarizes the analyses of the ToothGrowth data. The first step in the analyses is to make some basic exploratry data analyses.
+```{r, echo=FALSE }
 data(ToothGrowth)
 
 summary(ToothGrowth)
@@ -29,7 +29,7 @@ legend(2, 9, c("Ascorbic acid", "Orange juice"),
        fill = c("yellow", "orange"))
 ```
 
-The boxplot above indicates that orange juice may be the most promising delivery method regarding tooth growth at least for small dose levels. 
+The boxplot above indicates that orange juice may be the most promising delivery method regarding tooth growth at least for small dose levels.
 
 Next step is to compare tooth growth by delivery methods and dose levels by means of confidence intervals and hypothesis tests.
 
@@ -37,14 +37,12 @@ We split the data in six groups of delivery methods and dose levels. That is thr
 
 First we compare groups with the same dose level and different delivery methods. The null hypothesis says that there is no difference in the mean tooth growth for the two delivery methods given the same dose. We set the probablity of Type I error, alpha, to 0.05, i.e. the probability to reject the null hyothesis when, in fact, it is correct.
 
-We compare independent groups under unequal variances with confidence t intervals. When in doubt, assume unequal variances. Under enequal variances the 95% interval is
-approximated with  
-yhat - xhat +/-tdf*sqrt(Sx^2/nx + Sy^2/ny)   
-where tdf is calculated with degress of freedom  
+We compare independent groups under unequal variances with confidence t intervals. When in doubt, assume unequal variances. Under enequal variances the 95% interval is approximated with
+yhat - xhat +/-tdf*sqrt(Sx^2/nx + Sy^2/ny)
+where tdf is calculated with degress of freedom
 df = (Sx^2/nx + Sy^2/ny)^2 / ((Sx^2/nx)^2/(nx-1) + (Sy^2/ny)^2/(ny-1))
 
 First we compare the two delivery methods for a 0.5 mg dose level of Vitamin C. We calculate the 95% confidence interval for the null hypothesis according to the expression above for two groups under unequal variances and also by using the t.test function in R.
-
 ```{r, echo=TRUE}
 oj05 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 0.5,]
 aa05 <- ToothGrowth[ToothGrowth$supp == 'VC' & ToothGrowth$dose == 0.5,]
@@ -63,11 +61,12 @@ df05 <- dfn05/dfd05
 muoj05 - muaa05 + c(-1,1)*qt(0.975,df05)*se05
 t.test(oj05$len,aa05$len, paired=FALSE, var.equal = FALSE)$conf
 ```
-0 (no difference between the means) is outside the 95% confidence interval for 0.5 mg and therefore we reject the null hypothesis. 
+
+0 (no difference between the means) is outside the 95% confidence interval for 0.5 mg and therefore we reject the null hypothesis.
 
 We do the same thing for 1 and 2 mg dose levels of Vitamin C.
 
-```{r, echo =FALSE}
+```{r, echo=FALSE}
 oj10 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 1.0,]
 oj20 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 2.0,]
 aa10 <- ToothGrowth[ToothGrowth$supp == 'VC' & ToothGrowth$dose == 1.0,]
@@ -107,9 +106,9 @@ muoj20 - muaa20 + c(-1,1)*qt(0.975,df20)*se20
 t.test(oj20$len,aa20$len, paired=FALSE, var.equal = FALSE)$conf
 ```
 
-0 is outside the 95% confidence interval also for 1 mg and therefore we reject the null hypothesis. However, for 2 mg dose level of Vitamin C 0 is inside the confidence interval. Thus, we fail to reject the null hypothesis for 2 mg. 
+0 is outside the 95% confidence interval also for 1 mg and therefore we reject the null hypothesis. However, for 2 mg dose level of Vitamin C 0 is inside the confidence interval. Thus, we fail to reject the null hypothesis for 2 mg.
 
-We conclude that, for small doses of Vitamin C, the delivery method matters. Orange juice is more effective on tooth growth than ascorbic acid. For large doses, however, we couldn't conclude with confidence that the delivery method plays a difference. A theory is that the delivery method matters as long as the dose is low, but above a certain level the Guinea pigs become saturated with Vitamin C regardless of delivery method and the tooth length does no longer increase with increased dose levels.   
+We conclude that, for small doses of Vitamin C, the delivery method matters. Orange juice is more effective on tooth growth than ascorbic acid. For large doses, however, we couldn't conclude with confidence that the delivery method plays a difference. A theory is that the delivery method matters as long as the dose is low, but above a certain level the Guinea pigs become saturated with Vitamin C regardless of delivery method and the tooth length does no longer increase with increased dose levels.
 
 ```{r, echo=FALSE}
 t.test(oj20$len,oj10$len, paired=FALSE, var.equal = FALSE)$conf
@@ -118,4 +117,4 @@ t.test(aa20$len,aa10$len, paired=FALSE, var.equal = FALSE)$conf
 t.test(aa10$len,aa05$len, paired=FALSE, var.equal = FALSE)$conf
 ```
 
-Finnaly, we also draw some conclusions by testing independent groups under unequal variances with confidence t intervals of the same delivery methods but different dose levels. For both delivery methods increasing from 0.5 to 1 mg and increasing from 1 to 2 mg 0 is outside the confidence interval. Therefore, we reject the null hypothesis. Thus, for the same delivery method, the conclusion is that the dose level matters. 
+Finnaly, we also draw some conclusions by testing independent groups under unequal variances with confidence t intervals of the same delivery methods but different dose levels. For both delivery methods increasing from 0.5 to 1 mg and increasing from 1 to 2 mg 0 is outside the confidence interval. Therefore, we reject the null hypothesis. Thus, for the same delivery method, the conclusion is that the dose level matters.

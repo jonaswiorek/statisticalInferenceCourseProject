@@ -2,7 +2,7 @@
 title: "A Simulation Exercise of Statistical Inference"
 author: "Jonas Wiorek"
 date: "Sunday, April 26, 2015"
-output: html_document
+output: pdf_document
 ---
 
 The Central Limit Theorem (CLT) is one of the most important theorems in statistics. The CLT states that the distribution of averages of independent and identical distributed (iid) variables becomes that of a standard normal as the sample size, n, increases. 
