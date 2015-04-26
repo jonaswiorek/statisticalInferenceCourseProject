@@ -1,77 +1,90 @@
 ---
-title: "Statistical Inference Course Project"
+title: "A Simulation Exercise of Statistical Inference"
 author: "Jonas Wiorek"
-date: "Thursday, April 23, 2015"
+date: "Sunday, April 26, 2015"
 output: html_document
 ---
 
-- Title (give an appropriate title) and Author Name
-- Overview: In a few (2-3) sentences explain what is going to be reported on.
-- Simulations: Include English explanations of the simulations you ran, with the accompanying R code. Your explanations should make clear what the R code accomplishes.
-- Sample Mean versus Theoretical Mean: Include figures with titles. In the figures, highlight the means you are comparing. Include text that explains the figures and what is shown on them, and provides appropriate numbers.
-- Sample Variance versus Theoretical Variance: Include figures (output from R) with titles. Highlight the variances you are comparing. Include text that explains your understanding of the differences of the variances.
-- Distribution: Via figures and text, explain how one can tell the distribution is approximately normal.
+The Central Limit Theorem (CLT) is one of the most important theorems in statistics. The CLT states that the distribution of averages of independent and identical distributed (iid) variables becomes that of a standard normal as the sample size, n, increases. 
 
-```{r}
+In this report we will investigate the exponential distribution and compare it with the CLT. We take a population of exponential distribution with the rate lambda. The mean of the exponential distribution is 1/lambda and the standard deviation is also 1/lambda.
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+```
+
+```{r, echo=TRUE}
 lambda <- 0.2
-n <- 40
-nosim <- 1000
-rexp(n,lambda)
 mu <- 1/lambda
 sigma <-1/lambda 
-mean(rexp(n,lambda))
-var(rexp(n,lambda))
+```
 
-hist(apply(matrix(rexp(nosim*n, lambda),nosim),1,var))
+With lambda = `r lambda`, the mean of the exponential distribution is `r mu` and the standard deviation is `r sigma`.
 
+```{r, echo=TRUE}
+n <- 40
+nosim <- 1000
+```
+
+We will investigate the distribution of averages of `r n` exponentials. We will do `r nosim` simulations.
+
+The theory says that n samples of the exponential distribution has a mean asymptotically equal to lambda with increasing n, and that the mean of n samples of this exponetial distribution has a standard deviation asymptotically equal to lambda/sqrt(n).
 
 # Sample Mean
-# The population mean mu is 1/lambda for a population with exponential distribution with rate lambda 
-lambda
-mu
-hist(apply(matrix(rexp(nosim*n, lambda),nosim),1,mean))
-# The expexcted value of the sample mean, xHat, is the population mean mu
-xHat <- mean(apply(matrix(rexp(nosim*n, lambda),nosim),1,mean))
-xHat
-mu
+The histogram of the sample means from the simulations of the exponential distribution is plotted below. The expected value of the sample mean, xhat, is marked with a black dashed line and the population mean, mu, is marked with a solid grey line.  
+
+```{r, echo=TRUE, warning=FALSE}
+meansamples <- apply(matrix(rexp(nosim*n, lambda),nosim),1,mean)
+xhat <- mean(meansamples)
+df <- data.frame(meansamples)
+ggplot(df, aes(x=meansamples)) + 
+        geom_histogram(aes(y = ..density..), binwidth=0.05, color='gray', fill = 'orange', alpha = 0.5) + 
+        stat_function(fun = dnorm, geom='line',args=list(mean=mu,sd=sigma^2/n),col='orange',size=1.5) +
+        geom_vline(xintercept = mu, color='black', alpha=0.3,linetype = 'solid', size=1.5) +
+        geom_vline(xintercept = xhat, color='black',alpha=0.7,linetype = 'dashed', size=1.5) +
+        scale_x_continuous(breaks=c(mu-2*sigma/sqrt(n),mu-sigma/sqrt(n),mu,mu+sigma/sqrt(n),mu+2*sigma/sqrt(n))) +
+        xlab("Sample Mean") +
+        ggtitle('Histogram of the sample mean')
+```
+
+
+From the histogram above we could observe that the distribution of the sample means of the exponential distribution becomes that of a normal distribution. That is what is stated by the CLT. A normal distribution with mean = mu and standard deviation = sigma/sqrt(n) is overlayed to the histogram to illustrate this. The expected value of the sample mean, xhat, is equal to the population mean. xhat = `r round(xhat,3)`. Thus, close to the populatin mean = `r mu`. It would get even closer with a larger n according to the CLT.  
+
+```{r, echo=TRUE}
 # The variance of the sample mean is sigma^2/n
 sdMean <- sd(apply(matrix(rexp(nosim*n, lambda),nosim),1,mean))
-sdMean^2
-sigma^2/n
-# The logical estimate of the variance of the sample mean is S^2/n
-S <- mean(apply(matrix(rexp(nosim*n, lambda),nosim),1,sd))
-S^2/n
-
-
-
+# The logical estimate of the variance of the sample mean is S^2/n, 
+# where S^2 is the sample variance
+stddevsamples <- apply(matrix(rexp(nosim*n, lambda),nosim),1,sd)
+S <- mean(stddevsamples)
 ```
 
-Assume we have a population of exponential distribution with a  mean and standard deviation equal to lambda.
-n samples of this exponential distribution has mean asymptotically equal to lambda.
-The mean of n samples of this exponetial distribution has a standard deviation asymptotically equal lambda/sqrt(n).
+Further, the variance of the sample mean is sigma^2/n, i.e `r sigma^2/n`. The variance of the sample mean for the simulations is `r round(sdMean^2,3)`. The logical estimate of the variance of the sample mean is S^2/n, where S^2 is the sample variance. The sample variance over n for the simulations is `r round(S^2/n,3)`.
 
-# Sample Mean
-# The population mean mu is is 1/lambda for a population with exponential distribution with lambda 
-# The expexcted value of the sample mean, xHat, is the population mean mu
-# The variance of the sample mean is sigma^2/n
-# The logical estimate of the variance of the sample mean is s^2/n ???
+#Sample Variance
 
-# Sample Variance
-# The sample variance, S^2, estimates the population variance sigma^2
-# The sample variance expected value is the population variance
-# The distribution of the sample variance is centered around sigma^2
+The sample variance, S^2, estimates the population variance sigma^2. The sample variance expected value is equal to the population variance, i.e. the distribution of the sample variance is centered around sigma^2. 
 
-```{r, echo=FALSE}
+The histogram of the sample variance of the simulations is plotted below. The expected value of the sample varaince, S^2, is marked with a black dashed line and the population variance, sigma^2, is marked with a solid grey line. 
 
-# Sample Variance
-# The sample variance, S^2, estimates the population variance sigma^2
-# The sample variance expected value is the population variance
-# The distribution of the sample variance is centered around sigma^2
-hist(apply(matrix(rexp(nosim*n, lambda),nosim),1,var))
-mean(apply(matrix(rexp(nosim*n, lambda),nosim),1,var))
-S^2
-sigma^2
+```{r, echo=TRUE}
+variancesamples <- apply(matrix(rexp(nosim*n, lambda),nosim),1,var)
 
+ df <- data.frame(variancesamples)
+ ggplot(df, aes(x=variancesamples)) + 
+         geom_histogram(aes(y = ..density..), binwidth=0.5, color='gray', fill = 'orange', alpha = 0.5) + 
+         stat_function(fun = dnorm, geom='line', args=list(mean=sigma^2,sd=sqrt(2*sigma^4/(n-1))),col='orange',size=0.5, alpha = 0.5) +
+         geom_vline(xintercept = sigma^2, color='black', alpha=0.3,linetype = 'solid', size=1.5) +
+         geom_vline(xintercept = S^2, color='black',alpha=0.7,linetype = 'dashed', size=1.5) +
+#         scale_x_continuous(breaks=c(sigma^2-10,sigma^2,sigma^2+10) +
+        xlab("Sample Variance") +
+        ggtitle('Histogram of the sample variance')
+
+# The distribution of the sample variance gets more centered around 
+# the populatin variance sigma^2 with more data 
+sdvs <- sd(variancesamples)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+From the plot above we could observe that the distribution of the sample variance of the exponential distribution becomes that of a normal distribution with large n. The expected value of the sample variance, S^2, is equal to the population variance. S^2 = `r round(S^2,3)`. i.e. close to the populatin variance = `r sigma^2`.
+
+Finally, the distribution of the sample variance gets more centered around the populatin variance sigma^2 with increasing n. In the simulation with n equals to `r n` the standard deviation of the sample variance is about `r round(sdvs,3)`.

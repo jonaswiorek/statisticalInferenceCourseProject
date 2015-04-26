@@ -1,24 +1,121 @@
 ---
-title: "ToothGrowth.Rmd"
+title: "Basic Inferential Data Analysis of Tooth Growth"
 author: "Jonas Wiorek"
-date: "Friday, April 24, 2015"
+date: "Sunday, April 26, 2015"
 output: html_document
 ---
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r}
-data(ToothGrowth)
-
-```
-
-The Effect of Vitamin C on Tooth Growth in Guinea Pigs
-The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+This report summarizes the analyses of the ToothGrowth data. The first step in the analyses is to make some basic exploratry data analyses.
 
 ```{r, echo=FALSE}
+data(ToothGrowth)
 
+summary(ToothGrowth)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The data explores the effect of Vitamin C on tooth growth in Guinea Pigs. The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+```{r, echo=FALSE}
+boxplot(len ~ dose, data = ToothGrowth,
+        boxwex = 0.25, at = 1:3 - 0.2,
+        subset = supp == "VC", col = "yellow",
+        main = "Guinea Pigs' Tooth Growth",
+        xlab = "Vitamin C dose mg",
+        ylab = "tooth length",
+        xlim = c(0.5, 3.5), ylim = c(0, 35), yaxs = "i")
+boxplot(len ~ dose, data = ToothGrowth, add = TRUE,
+        boxwex = 0.25, at = 1:3 + 0.2,
+        subset = supp == "OJ", col = "orange")
+legend(2, 9, c("Ascorbic acid", "Orange juice"),
+       fill = c("yellow", "orange"))
+```
+
+The boxplot above indicates that orange juice may be the most promising delivery method regarding tooth growth at least for small dose levels. 
+
+Next step is to compare tooth growth by delivery methods and dose levels by means of confidence intervals and hypothesis tests.
+
+We split the data in six groups of delivery methods and dose levels. That is three groups with orange juice delivery method and dose levels of 0.5, 1 respectively 2 mg of Vitamin C, and three groups with ascorbic acid delivery method and the three dose levels.
+
+First we compare groups with the same dose level and different delivery methods. The null hypothesis says that there is no difference in the mean tooth growth for the two delivery methods given the same dose. We set the probablity of Type I error, alpha, to 0.05, i.e. the probability to reject the null hyothesis when, in fact, it is correct.
+
+We compare independent groups under unequal variances with confidence t intervals. When in doubt, assume unequal variances. Under enequal variances the 95% interval is
+approximated with  
+yhat - xhat +/-tdf*sqrt(Sx^2/nx + Sy^2/ny)   
+where tdf is calculated with degress of freedom  
+df = (Sx^2/nx + Sy^2/ny)^2 / ((Sx^2/nx)^2/(nx-1) + (Sy^2/ny)^2/(ny-1))
+
+First we compare the two delivery methods for a 0.5 mg dose level of Vitamin C. We calculate the 95% confidence interval for the null hypothesis according to the expression above for two groups under unequal variances and also by using the t.test function in R.
+
+```{r, echo=TRUE}
+oj05 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 0.5,]
+aa05 <- ToothGrowth[ToothGrowth$supp == 'VC' & ToothGrowth$dose == 0.5,]
+
+noj05 <- length(oj05$len)
+muoj05 <- mean(oj05$len)
+sdoj05 <- sd(oj05$len)
+naa05 <- length(aa05$len)
+muaa05 <- mean(aa05$len)
+sdaa05 <- sd(aa05$len)
+
+se05 <- sqrt(sdoj05^2/noj05 + sdaa05^2/naa05)
+dfn05 <- (sdoj05^2/noj05 + sdaa05^2/naa05)^2
+dfd05 <- (sdoj05^2/noj05)^2/(noj05-1) + (sdaa05^2/naa05)^2/(naa05-1)
+df05 <- dfn05/dfd05
+muoj05 - muaa05 + c(-1,1)*qt(0.975,df05)*se05
+t.test(oj05$len,aa05$len, paired=FALSE, var.equal = FALSE)$conf
+```
+0 (no difference between the means) is outside the 95% confidence interval for 0.5 mg and therefore we reject the null hypothesis. 
+
+We do the same thing for 1 and 2 mg dose levels of Vitamin C.
+
+```{r, echo =FALSE}
+oj10 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 1.0,]
+oj20 <- ToothGrowth[ToothGrowth$supp == 'OJ' & ToothGrowth$dose == 2.0,]
+aa10 <- ToothGrowth[ToothGrowth$supp == 'VC' & ToothGrowth$dose == 1.0,]
+aa20 <- ToothGrowth[ToothGrowth$supp == 'VC' & ToothGrowth$dose == 2.0,]
+
+noj10 <- length(oj10$len)
+muoj10 <- mean(oj10$len)
+sdoj10 <- sd(oj10$len)
+noj20 <- length(oj20$len)
+muoj20 <- mean(oj20$len)
+sdoj20 <- sd(oj20$len)
+
+naa10 <- length(aa10$len)
+muaa10 <- mean(aa10$len)
+sdaa10 <- sd(aa10$len)
+naa20 <- length(aa20$len)
+muaa20 <- mean(aa20$len)
+sdaa20 <- sd(aa20$len)
+
+se10 <- sqrt(sdoj10^2/noj10 + sdaa10^2/naa10)
+se20 <- sqrt(sdoj20^2/noj20 + sdaa20^2/naa20)
+
+dfn10 <- (sdoj10^2/noj10 + sdaa10^2/naa10)^2
+dfd10 <- (sdoj10^2/noj10)^2/(noj10-1) + (sdaa10^2/naa10)^2/(naa10-1)
+df10 <- dfn10/dfd10
+
+dfn20 <- (sdoj20^2/noj20 + sdaa20^2/naa20)^2
+dfd20 <- (sdoj20^2/noj20)^2/(noj20-1) + (sdaa20^2/naa20)^2/(naa20-1)
+df20 <- dfn20/dfd20
+```
+
+```{r, echo=TRUE}
+muoj10 - muaa10 + c(-1,1)*qt(0.975,df10)*se10
+t.test(oj10$len,aa10$len, paired=FALSE, var.equal = FALSE)$conf
+
+muoj20 - muaa20 + c(-1,1)*qt(0.975,df20)*se20
+t.test(oj20$len,aa20$len, paired=FALSE, var.equal = FALSE)$conf
+```
+
+0 is outside the 95% confidence interval also for 1 mg and therefore we reject the null hypothesis. However, for 2 mg dose level of Vitamin C 0 is inside the confidence interval. Thus, we fail to reject the null hypothesis for 2 mg. 
+
+We conclude that, for small doses of Vitamin C, the delivery method matters. Orange juice is more effective on tooth growth than ascorbic acid. For large doses, however, we couldn't conclude with confidence that the delivery method plays a difference. A theory is that the delivery method matters as long as the dose is low, but above a certain level the Guinea pigs become saturated with Vitamin C regardless of delivery method and the tooth length does no longer increase with increased dose levels.   
+
+```{r, echo=FALSE}
+t.test(oj20$len,oj10$len, paired=FALSE, var.equal = FALSE)$conf
+t.test(oj10$len,oj05$len, paired=FALSE, var.equal = FALSE)$conf
+t.test(aa20$len,aa10$len, paired=FALSE, var.equal = FALSE)$conf
+t.test(aa10$len,aa05$len, paired=FALSE, var.equal = FALSE)$conf
+```
+
+Finnaly, we also draw some conclusions by testing independent groups under unequal variances with confidence t intervals of the same delivery methods but different dose levels. For both delivery methods increasing from 0.5 to 1 mg and increasing from 1 to 2 mg 0 is outside the confidence interval. Therefore, we reject the null hypothesis. Thus, for the same delivery method, the conclusion is that the dose level matters. 
